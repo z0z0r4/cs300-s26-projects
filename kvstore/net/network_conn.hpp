@@ -3,6 +3,7 @@
 
 #include <sys/socket.h>
 #include <unistd.h>
+#include <mutex>
 
 #include "net/network_messages.hpp"
 #include "net/server_commands.hpp"

@@ -96,6 +96,7 @@ bool KvServer::Join() {
   std::optional<Response> res = this->shardcontroller_conn->recv_response();
   if (!res) return false;
   if (auto* join_res = std::get_if<JoinResponse>(&*res)) {
+    (void)join_res;
     return true;
   }
 
@@ -109,6 +110,7 @@ bool KvServer::Leave() {
   std::optional<Response> res = this->shardcontroller_conn->recv_response();
   if (!res) return false;
   if (auto* leave_res = std::get_if<LeaveResponse>(&*res)) {
+    (void)leave_res;
     return true;
   }
 

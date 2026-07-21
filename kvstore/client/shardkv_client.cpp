@@ -81,6 +81,7 @@ bool ShardKvClient::Move(const std::string& dest_server,
   std::optional<Response> res = this->shardcontroller_conn->recv_response();
   if (!res) return false;
   if (auto* move_res = std::get_if<MoveResponse>(&*res)) {
+    (void)move_res;
     return true;
   }
 

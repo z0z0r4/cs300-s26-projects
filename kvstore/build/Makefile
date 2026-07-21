@@ -1,7 +1,7 @@
 CC = clang++
 
 PROJECT_SRC = ..
-CPPFLAGS += -std=c++20 -Wall -Wextra -pthread -I$(PROJECT_SRC) -g -Werror -Wno-error=unused-parameter -Wno-unused-parameter
+CPPFLAGS += -std=c++20 -Wall -Wextra -pthread -I$(PROJECT_SRC) -g -Werror -Wno-error=unused-parameter -Wno-unused-parameter -Wno-error=missing-template-arg-list-after-template-kw -Wno-missing-template-arg-list-after-template-kw
 
 ASANFLAG = -fsanitize=address
 TSANFLAG = -fsanitize=thread

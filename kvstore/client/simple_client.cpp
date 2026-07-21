@@ -142,15 +142,39 @@ bool SimpleClient::MultiPut(const std::vector<std::string>& keys,
 }
 
 bool SimpleClient::GDPRDelete(const std::string& user) {
-  // TODO: Write your GDPR deletion code here!
-  // You can invoke operations directly on the client object, like so:
-  //
-  // std::string key("user_1_posts");
-  // std::optional<std::string> posts = Get(key);
-  // ...
-  //
-  // Assume the `user` argument is a user ID such as "user_1".
+    // TODO: Write your GDPR deletion code here!
+    // You can invoke operations directly on the client object, like so:
+    //
+    // std::string key("user_1_posts");
+    // std::optional<std::string> posts = Get(key);
+    // ...
+    //
+    // Assume the `user` argument is a user ID such as "user_1".
 
-  cerr_color(RED, "GDPR deletion is unimplemented!");
-  return false;
+    std::string user_posts_key = user + "_posts";
+    std::optional<std::string> posts_list_str = Get(user_posts_key);
+
+    if (posts_list_str.has_value() && !posts_list_str->empty()) {
+        // 解析以逗号分隔的 post_id 列表
+        std::stringstream ss(*posts_list_str);
+        std::string post_id;
+
+        while (std::getline(ss, post_id, ',')) {
+            // 去除可能的前后空格
+            post_id.erase(0, post_id.find_first_not_of(" \t"));
+            post_id.erase(post_id.find_last_not_of(" \t") + 1);
+
+            if (post_id.empty()) continue;
+
+            Delete(post_id + "_replies");
+
+            Delete(post_id);
+        }
+    }
+
+    Delete(user_posts_key);
+
+    Delete(user);
+
+    return true;
 }

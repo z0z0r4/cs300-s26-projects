@@ -144,9 +144,8 @@ std::vector<std::string> ConcurrentKvStore::AllKeys() {
         store.bucket_locks[i].lock_shared();
     }
     std::vector<std::string> all_keys;
-    for (auto& list : store.buckets) {
-        for (auto& item : list) {
-            auto key = item.key;
+    for (auto& bucket : store.buckets) {
+        for (auto& [key, val] : bucket) {
             all_keys.emplace_back(key);
         }
     }

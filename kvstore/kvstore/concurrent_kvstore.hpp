@@ -4,7 +4,7 @@
 #include <array>
 #include <cassert>
 #include <functional>
-#include <list>
+#include <unordered_map>
 #include <map>
 #include <optional>
 #include <shared_mutex>
@@ -22,9 +22,7 @@ struct DbItem {
   std::string key;
   std::string value;
 
-  DbItem(std::string& k, std::string& v) {
-    this->key = k;
-    this->value = v;
+  DbItem(const std::string& k, const std::string& v) : key(k), value(v) {
   }
 
   bool operator==(const DbItem& item) {
@@ -43,8 +41,8 @@ class DbMap {
   static constexpr size_t BUCKET_COUNT = 60;
 
   // Bucket associative array, with corresponding mutexes to protect access.
-  std::array<std::list<DbItem>, BUCKET_COUNT> buckets;
   std::array<std::shared_mutex, BUCKET_COUNT> bucket_locks;
+  std::array<std::unordered_map<std::string, std::string>, BUCKET_COUNT> buckets;
 
   // TODO (Part A, Step 4): You will need to add fields to synchronize access to
   // the hashmap buckets!
@@ -58,10 +56,9 @@ class DbMap {
   // otherwise Assumes that `b` == this->bucket(key).
   std::optional<DbItem> getIfExists(size_t b, std::string key) {
     assert(b < BUCKET_COUNT);
-    for (const auto& item : this->buckets[b]) {
-      if (item.key == key) {
-        return item;
-      }
+    auto it = this->buckets[b].find(key);
+    if (it != this->buckets[b].end()) {
+      return DbItem(it->first, it->second);
     }
     return std::nullopt;
   }
@@ -71,24 +68,14 @@ class DbMap {
   // Assumes that `b` == this->bucket(key).
   void insertItem(size_t b, std::string key, std::string value) {
     assert(b < BUCKET_COUNT);
-
-    for (auto& item : this->buckets[b]) {
-      if (item.key == key) {
-        item.value = value;
-        return;
-      }
-    }
-    this->buckets[b].emplace_back(key, value);
+    this->buckets[b][key] = value;
   }
 
   // Remove a DbItem with key `key` from bucket `b`.
   // Assumes that `b` == this->getBucketIndex(key).
   bool removeItem(size_t b, std::string key) {
     assert(b < BUCKET_COUNT);
-
-    size_t num_removed = this->buckets[b].remove_if(
-        [&](auto&& item) { return item.key == key; });
-    return num_removed > 0;
+    return this->buckets[b].erase(key) > 0;
   }
 
  private:
